@@ -9,25 +9,25 @@ import (
 
 func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 	bounds := screen.Bounds()
-	tilesPerRow := math.Ceil(float64(bounds.Size().X) / float64(g.tileSize))
-	tilesPerCol := math.Ceil(float64(bounds.Size().Y) / float64(g.tileSize))
-	xStart := g.player.x - tilesPerRow/2
-	yStart := g.player.y - tilesPerCol/2
+	tilesPerRow := float64(bounds.Size().X)/float64(g.tileSize) + 1
+	tilesPerCol := float64(bounds.Size().Y)/float64(g.tileSize) + 1
+	xStart := math.Floor(g.player.x - math.Floor(tilesPerRow/2))
+	yStart := math.Floor(g.player.y - math.Floor(tilesPerCol/2))
 
 	geo := ebiten.GeoM{}
 	for ty := 0; ty < int(tilesPerCol); ty++ {
 		worldY := int(yStart) + ty
-		if worldY < 0 || worldY >= g.worldSize {
+		if worldY < 0 || worldY >= g.worldSize || g.world[worldY] == nil {
 			continue
 		}
 		for tx := 0; tx < int(tilesPerRow); tx++ {
 			worldX := int(xStart) + tx
-			if worldX < 0 || worldX >= g.worldSize {
+			if worldX < 0 || worldX >= g.worldSize || g.world[worldY][worldX] == nil {
 				continue
 			}
 			geo.Reset()
 			geo.Translate(float64(tx*g.tileSize), float64(ty*g.tileSize))
-			location := g.world[int(yStart)+ty][int(xStart)+tx]
+			location := g.world[worldY][worldX]
 			for _, tile := range location.locationType.tiles {
 				screen.DrawImage(tile, &ebiten.DrawImageOptions{GeoM: geo})
 			}
@@ -44,7 +44,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Clear()
 	drawWorld(screen, g, true)
 	x, y := ebiten.CursorPosition()
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("%.0f %.0f [%d %d] (%d,%d)", ebiten.ActualFPS(), ebiten.ActualTPS(), screen.Bounds().Size().X, screen.Bounds().Size().Y, x, y))
+
+	ebitenutil.DebugPrint(screen, fmt.Sprintf(
+		"%.0fFPS %.0fTPS\nRes: %dx%d\nCur: %d,%d\nPlayer: %.0f,%.0f\n",
+		ebiten.ActualFPS(),
+		ebiten.ActualTPS(),
+		screen.Bounds().Size().X, screen.Bounds().Size().Y,
+		x, y,
+		math.Floor(g.player.x), math.Floor(g.player.y),
+	))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
