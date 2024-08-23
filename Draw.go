@@ -11,8 +11,8 @@ func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 	bounds := screen.Bounds()
 	tilesPerRow := float64(bounds.Size().X)/float64(g.tileSize) + 1
 	tilesPerCol := float64(bounds.Size().Y)/float64(g.tileSize) + 1
-	xStart := math.Floor(g.player.x - math.Floor(tilesPerRow/2))
-	yStart := math.Floor(g.player.y - math.Floor(tilesPerCol/2))
+	xStart := math.Floor(g.player.position.X - math.Floor(tilesPerRow/2))
+	yStart := math.Floor(g.player.position.Y - math.Floor(tilesPerCol/2))
 
 	geo := ebiten.GeoM{}
 	for ty := 0; ty < int(tilesPerCol); ty++ {
@@ -32,8 +32,8 @@ func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 				screen.DrawImage(tile, &ebiten.DrawImageOptions{GeoM: geo})
 			}
 			if drawPlayer &&
-				math.Floor(xStart+float64(tx)) == math.Floor(g.player.x) &&
-				math.Floor(yStart+float64(ty)) == math.Floor(g.player.y) {
+				math.Floor(xStart+float64(tx)) == math.Floor(g.player.position.X) &&
+				math.Floor(yStart+float64(ty)) == math.Floor(g.player.position.Y) {
 				screen.DrawImage(g.player.tile, &ebiten.DrawImageOptions{GeoM: geo})
 			}
 		}
@@ -51,7 +51,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebiten.ActualTPS(),
 		screen.Bounds().Size().X, screen.Bounds().Size().Y,
 		x, y,
-		math.Floor(g.player.x), math.Floor(g.player.y),
+		math.Floor(g.player.position.X), math.Floor(g.player.position.Y),
 	))
 }
 

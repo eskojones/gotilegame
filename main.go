@@ -17,9 +17,9 @@ func main() {
 		return
 	}
 
-	g.server = os.Args[1]
-	g.username = os.Args[2]
-	g.password = os.Args[3]
+	g.net.server = os.Args[1]
+	g.net.username = os.Args[2]
+	g.net.password = os.Args[3]
 	go NetUpdate(g)
 
 	if err := ebiten.RunGame(g); err != nil {

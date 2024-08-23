@@ -38,8 +38,8 @@ func makeWorld(g *Game) {
 		}
 	}
 	// player config
-	g.player.x = 0 // rand.Float64() * float64(g.worldSize)
-	g.player.y = 0 // rand.Float64() * float64(g.worldSize)
+	g.player.position.X = 0 // rand.Float64() * float64(g.worldSize)
+	g.player.position.Y = 0 // rand.Float64() * float64(g.worldSize)
 	g.player.moveSpeed = 0.0005
 	g.player.tile = g.tileset.SubImage(image.Rect(1*g.tileSize, 0*g.tileSize, 1*g.tileSize+g.tileSize, 0*g.tileSize+g.tileSize)).(*ebiten.Image)
 }
