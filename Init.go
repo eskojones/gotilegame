@@ -64,5 +64,6 @@ func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale
 	g.worldSize = worldSize
 	g.tileSize = tileSize
 	makeWorld(g)
+	g.running = true
 	return g, nil
 }

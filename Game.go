@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"net"
 )
 
 type LocationType struct {
@@ -23,6 +24,7 @@ type Player struct {
 }
 
 type Game struct {
+	running       bool
 	windowScale   float64
 	worldSize     int
 	tileSize      int
@@ -30,4 +32,10 @@ type Game struct {
 	locationTypes map[string]*LocationType
 	world         map[int]map[int]*Location
 	player        Player
+	username      string
+	password      string
+	server        string
+	dialer        net.Dialer
+	connection    net.Conn
+	readBuffer    [1024]byte
 }
