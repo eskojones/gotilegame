@@ -20,8 +20,7 @@ func main() {
 	g.server = os.Args[1]
 	g.username = os.Args[2]
 	g.password = os.Args[3]
-	go NetHandler(g)
-	// ebiten.SetFullscreen(true)
+	go NetUpdate(g)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

@@ -39,3 +39,8 @@ type Game struct {
 	connection    net.Conn
 	readBuffer    [1024]byte
 }
+
+const CLIENT_FN_CREATE = "create" // command to create an account
+const CLIENT_FN_LOGIN = "login"   // command to login to an account
+const CLIENT_FN_LOGOUT = "logout" // command to logout from an account
+const CLIENT_FN_UPDATE = "update" // command to update a player's position
