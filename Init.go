@@ -56,6 +56,8 @@ func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale
 	ebiten.SetWindowTitle(windowTitle)
 	ebiten.SetTPS(60)
 	g := new(Game)
+	g.windowWidth = windowWidth
+	g.windowHeight = windowHeight
 	g.windowScale = windowScale
 	tilesetImgBytes, err := os.ReadFile(tilesetFilename)
 	if err != nil {

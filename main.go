@@ -11,7 +11,7 @@ func main() {
 		log.Fatal("Usage: go run . <address>:<port> <username> <password>")
 		return
 	}
-	g, err := makeGame("Game", 1024, 768, 1.0, 1024, "tileset-transparent.png", 32)
+	g, err := makeGame("Game", 1024, 768, 1, 1024, "tileset-transparent.png", 32)
 	if err != nil {
 		log.Fatal(err)
 		return

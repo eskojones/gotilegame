@@ -59,12 +59,14 @@ type World struct {
 }
 
 type Game struct {
-	running     bool    // is the game running?
-	lastUpdate  int64   // unix timestamp in milliseconds of last update()
-	windowScale float64 // multiplier for the window resolution
-	world       World   // all world-related vars
-	player      Player  // the local player
-	net         NetConn // all network-related vars
+	running      bool  // is the game running?
+	lastUpdate   int64 // unix timestamp in milliseconds of last update()
+	windowWidth  int
+	windowHeight int
+	windowScale  float64 // multiplier for the window resolution
+	world        World   // all world-related vars
+	player       Player  // the local player
+	net          NetConn // all network-related vars
 }
 
 const CLIENT_FN_CREATE = "create" // command to create an account
