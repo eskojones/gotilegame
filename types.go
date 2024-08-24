@@ -36,6 +36,7 @@ type Player struct {
 	position  Point   // position in the world
 	moveSpeed float64 // speed that X/Y are allowed to change by per tick
 	sprite    *Sprite
+	tileAtlas *ebiten.Image
 }
 
 // NetConn : all network-related vars
@@ -47,17 +48,22 @@ type NetConn struct {
 	connection net.Conn   // the tcp connection with server
 }
 
-type Game struct {
-	running       bool                      // is the game running?
-	windowScale   float64                   // multiplier for the window resolution
-	worldSize     int                       // width / height of the game world (in tiles)
+type World struct {
+	size          int                       // width / height of the game world (in tiles)
 	tileSize      int                       // width / height of the tiles (in pixels)
-	tileset       *ebiten.Image             // image file to use as tile atlas
-	sprites       map[string]*Sprite        // name -> sprites
-	locationTypes map[string]*LocationType  // name -> location types
-	world         map[int]map[int]*Location // y,x -> locations
-	player        Player                    // the local player
-	net           NetConn                   // all network-related vars
+	tileAtlas     *ebiten.Image             // tile atlas to use for the location sprites
+	sprites       map[string]*Sprite        // sprites to use for drawing the locations
+	locationTypes map[string]*LocationType  // archetypes defining locations
+	locations     map[int]map[int]*Location // the map itself
+}
+
+type Game struct {
+	running     bool    // is the game running?
+	lastUpdate  int64   // unix timestamp in milliseconds of last update()
+	windowScale float64 // multiplier for the window resolution
+	world       World   // all world-related vars
+	player      Player  // the local player
+	net         NetConn // all network-related vars
 }
 
 const CLIENT_FN_CREATE = "create" // command to create an account

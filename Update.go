@@ -3,22 +3,26 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"os"
+	"time"
 )
 
 func (g *Game) Update() error {
-	// dt := 1000.0 / ebiten.ActualFPS()
+	dt := float64(time.Now().UnixMilli()-g.lastUpdate) * 0.001
+
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)
 	} else if ebiten.IsKeyPressed(ebiten.KeyW) {
-		g.player.position.Y -= (g.player.moveSpeed / 1.0) * float64(g.worldSize)
+		g.player.position.Y -= g.player.moveSpeed * dt
 	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
-		g.player.position.Y += (g.player.moveSpeed / 1.0) * float64(g.worldSize)
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		g.player.position.X -= (g.player.moveSpeed / 1.0) * float64(g.worldSize)
-	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
-		g.player.position.X += (g.player.moveSpeed / 1.0) * float64(g.worldSize)
+		g.player.position.Y += g.player.moveSpeed * dt
 	}
 
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		g.player.position.X -= g.player.moveSpeed * dt
+	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
+		g.player.position.X += g.player.moveSpeed * dt
+	}
+
+	g.lastUpdate = time.Now().UnixMilli()
 	return nil
 }

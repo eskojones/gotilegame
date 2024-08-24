@@ -9,34 +9,37 @@ import (
 
 func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 	bounds := screen.Bounds()
-	tilesPerRow := float64(bounds.Size().X)/float64(g.tileSize) + 1
-	tilesPerCol := float64(bounds.Size().Y)/float64(g.tileSize) + 1
+	tilesPerRow := float64(bounds.Size().X)/float64(g.world.tileSize) + 1
+	tilesPerCol := float64(bounds.Size().Y)/float64(g.world.tileSize) + 1
 	xStart := math.Floor(g.player.position.X - math.Floor(tilesPerRow/2))
 	yStart := math.Floor(g.player.position.Y - math.Floor(tilesPerCol/2))
 
-	geo := ebiten.GeoM{}
+	options := &ebiten.DrawImageOptions{}
+	// options.ColorScale.Scale(1, 1, 1, 1)
 	for ty := 0; ty < int(tilesPerCol); ty++ {
 		worldY := int(yStart) + ty
-		if worldY < 0 || worldY >= g.worldSize || g.world[worldY] == nil {
+		if worldY < 0 || worldY >= g.world.size || g.world.locations[worldY] == nil {
 			continue
 		}
 		for tx := 0; tx < int(tilesPerRow); tx++ {
 			worldX := int(xStart) + tx
-			if worldX < 0 || worldX >= g.worldSize || g.world[worldY][worldX] == nil {
+			if worldX < 0 || worldX >= g.world.size || g.world.locations[worldY][worldX] == nil {
 				continue
 			}
-			geo.Reset()
-			geo.Translate(float64(tx*g.tileSize), float64(ty*g.tileSize))
-			location := g.world[worldY][worldX]
+			options.GeoM.Reset()
+			options.GeoM.Translate(float64(tx*g.world.tileSize), float64(ty*g.world.tileSize))
+			location := g.world.locations[worldY][worldX]
 			sprites := location.locationType.sprites
 			for _, sprite := range sprites {
-				sprite.Draw(screen, &ebiten.DrawImageOptions{GeoM: geo})
+				sprite.Draw(screen, options)
 			}
 			if drawPlayer &&
 				math.Floor(xStart+float64(tx)) == math.Floor(g.player.position.X) &&
 				math.Floor(yStart+float64(ty)) == math.Floor(g.player.position.Y) {
 				sprite := g.player.sprite
-				sprite.Draw(screen, &ebiten.DrawImageOptions{GeoM: geo})
+				// options.ColorScale.Scale(0.5, 0.5, 0.5, 1)
+				sprite.Draw(screen, options)
+				// options.ColorScale.Scale(1, 1, 1, 1)
 			}
 		}
 	}

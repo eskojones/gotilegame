@@ -13,34 +13,38 @@ func makeLocationType(g *Game, name string, sprites []*Sprite, isBlocking bool) 
 	locType.name = name
 	locType.blocking = isBlocking
 	locType.sprites = sprites
-	g.locationTypes[name] = locType
+	g.world.locationTypes[name] = locType
 	return locType
 }
 
 func makeWorld(g *Game) {
 	// some test tiles
-	grass := makeSprite(g.tileset, []image.Point{{8, 2}, {6, 2}}, 32, 333)
-	stone := makeSprite(g.tileset, []image.Point{{1, 2}, {2, 2}}, 32, 1000)
-	stone2 := makeSprite(g.tileset, []image.Point{{3, 2}}, 32, 0)
-	makeLocationType(g, "grass", []*Sprite{grass}, false)
+	dirt := makeSprite(g.world.tileAtlas, []image.Point{{10, 2}}, 32, 0)
+	stone := makeSprite(g.world.tileAtlas, []image.Point{{11, 4}}, 32, 0)
+	broken_stone := makeSprite(g.world.tileAtlas, []image.Point{{11, 5}}, 32, 0)
+	makeLocationType(g, "stone over dirt", []*Sprite{dirt, broken_stone}, false)
 	makeLocationType(g, "stone", []*Sprite{stone}, false)
-	makeLocationType(g, "stone2", []*Sprite{stone2}, false)
 	// test map fully populated
-	types := []string{"grass", "stone", "stone2"}
-	for y := 0; y < g.worldSize; y++ {
-		if g.world[y] == nil {
-			g.world[y] = make(map[int]*Location)
+	for y := 0; y < g.world.size; y++ {
+		if g.world.locations[y] == nil {
+			g.world.locations[y] = make(map[int]*Location)
 		}
-		for x := 0; x < g.worldSize; x++ {
-			g.world[y][x] = new(Location)
-			g.world[y][x].locationType = g.locationTypes[types[rand.Int()%3]]
+		for x := 0; x < g.world.size; x++ {
+			g.world.locations[y][x] = new(Location)
+			r := rand.Int() % 100
+			if r > 95 {
+				g.world.locations[y][x].locationType = g.world.locationTypes["stone over dirt"]
+			} else {
+				g.world.locations[y][x].locationType = g.world.locationTypes["stone"]
+			}
 		}
 	}
 	// player config
 	g.player.position.X = 0 // rand.Float64() * float64(g.worldSize)
 	g.player.position.Y = 0 // rand.Float64() * float64(g.worldSize)
-	g.player.moveSpeed = 0.0005
-	g.player.sprite = makeSprite(g.tileset, []image.Point{{0, 0}, {0, 1}, {1, 1}, {1, 0}}, 32, 200)
+	g.player.moveSpeed = 10.0
+	g.player.tileAtlas = g.world.tileAtlas
+	g.player.sprite = makeSprite(g.player.tileAtlas, []image.Point{{0, 0}, {0, 1}, {1, 1}, {1, 0}}, 32, 200)
 }
 
 func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale float64, worldSize int, tilesetFilename string, tileSize int) (*Game, error) {
@@ -57,11 +61,12 @@ func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale
 	if err != nil {
 		return nil, err
 	}
-	g.tileset = ebiten.NewImageFromImage(tilesetImage)
-	g.locationTypes = make(map[string]*LocationType)
-	g.world = make(map[int]map[int]*Location)
-	g.worldSize = worldSize
-	g.tileSize = tileSize
+	g.world.tileAtlas = ebiten.NewImageFromImage(tilesetImage)
+	g.world.tileSize = tileSize
+	g.world.size = worldSize
+	g.world.locationTypes = make(map[string]*LocationType)
+	g.world.locations = make(map[int]map[int]*Location)
+	g.world.sprites = make(map[string]*Sprite)
 	makeWorld(g)
 	g.running = true
 	return g, nil
