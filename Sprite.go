@@ -29,11 +29,17 @@ func makeSprite(atlas *ebiten.Image, tiles []image.Point, size int, delay int64)
 func (sprite *Sprite) Draw(screen *ebiten.Image, options *ebiten.DrawImageOptions) {
 	if sprite.playing {
 		if time.Now().UnixMilli()-sprite.lastFrame >= sprite.delay {
-			sprite.frame++
-			if sprite.frame >= len(sprite.tiles) {
-				sprite.frame = 0
+			// adjust frame counter by how many delays have elapsed
+			elapsed := time.Now().UnixMilli() - sprite.lastFrame
+			for elapsed >= sprite.delay {
+				sprite.frame++
+				if sprite.frame >= len(sprite.tiles) {
+					sprite.frame = 0
+				}
+				elapsed -= sprite.delay
 			}
-			sprite.lastFrame = time.Now().UnixMilli()
+			// keep remainder of time elapsed
+			sprite.lastFrame = time.Now().UnixMilli() - elapsed
 		}
 	}
 	screen.DrawImage(sprite.tiles[sprite.frame], options)
