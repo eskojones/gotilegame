@@ -1,5 +1,8 @@
-a 2d tile-based game as a means to learn about Go and ebitengine.
+# gotilegame
 
-expect breaking changes.
+A 2D tile-based game engine(?) as a means to learn about Go and ebitengine.
 
-server project located at github.com/eskojones/gogameserver
+Please **expect** breaking changes.
+
+Server project [@eskojones/gogameserver](https://github.com/eskojones/gogameserver)
+
