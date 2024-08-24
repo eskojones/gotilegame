@@ -26,8 +26,8 @@ func drawWorld(screen *ebiten.Image, g *Game, pos Point) {
 	vX := math.Floor(viewX)
 	vY := math.Floor(viewY)
 	// fractional tile to offset all drawing for smooth scrolling
-	fvX := math.Round((viewX - vX) * -tileWidth)
-	fvY := math.Round((viewY - vY) * -tileHeight)
+	fvX := math.Floor((viewX - vX) * -tileWidth)
+	fvY := math.Floor((viewY - vY) * -tileHeight)
 
 	var x float64 = 0
 	var y float64 = 0
