@@ -6,8 +6,12 @@ import (
 	"time"
 )
 
+func (g *Game) DeltaTime() float64 {
+	return float64(time.Now().UnixMilli()-g.lastUpdate) * 0.001
+}
+
 func (g *Game) Update() error {
-	dt := float64(time.Now().UnixMilli()-g.lastUpdate) * 0.001
+	dt := g.DeltaTime()
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)

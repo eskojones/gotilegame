@@ -15,7 +15,6 @@ func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 	yStart := math.Floor(g.player.position.Y - math.Floor(tilesPerCol/2))
 
 	options := &ebiten.DrawImageOptions{}
-	// options.ColorScale.Scale(1, 1, 1, 1)
 	for ty := 0; ty < int(tilesPerCol); ty++ {
 		worldY := int(yStart) + ty
 		if worldY < 0 || worldY >= g.world.size || g.world.locations[worldY] == nil {
@@ -37,9 +36,7 @@ func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 				math.Floor(xStart+float64(tx)) == math.Floor(g.player.position.X) &&
 				math.Floor(yStart+float64(ty)) == math.Floor(g.player.position.Y) {
 				sprite := g.player.sprite
-				// options.ColorScale.Scale(0.5, 0.5, 0.5, 1)
 				sprite.Draw(screen, options)
-				// options.ColorScale.Scale(1, 1, 1, 1)
 			}
 		}
 	}

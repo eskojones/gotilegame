@@ -36,6 +36,7 @@ type Player struct {
 	position  Point   // position in the world
 	moveSpeed float64 // speed that X/Y are allowed to change by per tick
 	sprite    *Sprite
+	tileSize  int
 	tileAtlas *ebiten.Image
 }
 

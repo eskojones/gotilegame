@@ -18,23 +18,26 @@ func makeLocationType(g *Game, name string, sprites []*Sprite, isBlocking bool) 
 }
 
 func makeWorld(g *Game) {
-	// some test tiles
-	dirt := makeSprite(g.world.tileAtlas, []image.Point{{10, 2}}, 32, 0)
+	// some test tiles (single frame sprites)
+	dirt := makeSprite(g.world.tileAtlas, []image.Point{{11, 2}}, 32, 0)
 	stone := makeSprite(g.world.tileAtlas, []image.Point{{11, 4}}, 32, 0)
 	broken_stone := makeSprite(g.world.tileAtlas, []image.Point{{11, 5}}, 32, 0)
+	// test locations composed of layered sprites
 	makeLocationType(g, "stone over dirt", []*Sprite{dirt, broken_stone}, false)
 	makeLocationType(g, "stone", []*Sprite{stone}, false)
+	makeLocationType(g, "dirt", []*Sprite{dirt}, false)
 	// test map fully populated
 	for y := 0; y < g.world.size; y++ {
 		if g.world.locations[y] == nil {
 			g.world.locations[y] = make(map[int]*Location)
 		}
 		for x := 0; x < g.world.size; x++ {
-			g.world.locations[y][x] = new(Location)
 			r := rand.Int() % 100
 			if r > 95 {
+				g.world.locations[y][x] = new(Location)
 				g.world.locations[y][x].locationType = g.world.locationTypes["stone over dirt"]
-			} else {
+			} else if r > 30 {
+				g.world.locations[y][x] = new(Location)
 				g.world.locations[y][x].locationType = g.world.locationTypes["stone"]
 			}
 		}
@@ -44,7 +47,8 @@ func makeWorld(g *Game) {
 	g.player.position.Y = 0 // rand.Float64() * float64(g.worldSize)
 	g.player.moveSpeed = 10.0
 	g.player.tileAtlas = g.world.tileAtlas
-	g.player.sprite = makeSprite(g.player.tileAtlas, []image.Point{{0, 0}, {0, 1}, {1, 1}, {1, 0}}, 32, 200)
+	g.player.tileSize = g.world.tileSize
+	g.player.sprite = makeSprite(g.player.tileAtlas, []image.Point{{2, 13}, {2, 14}}, 32, 200)
 }
 
 func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale float64, worldSize int, tilesetFilename string, tileSize int) (*Game, error) {
