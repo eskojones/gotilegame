@@ -28,13 +28,15 @@ func drawWorld(screen *ebiten.Image, g *Game, drawPlayer bool) {
 			geo.Reset()
 			geo.Translate(float64(tx*g.tileSize), float64(ty*g.tileSize))
 			location := g.world[worldY][worldX]
-			for _, tile := range location.locationType.tiles {
-				screen.DrawImage(tile, &ebiten.DrawImageOptions{GeoM: geo})
+			sprites := location.locationType.sprites
+			for _, sprite := range sprites {
+				sprite.Draw(screen, &ebiten.DrawImageOptions{GeoM: geo})
 			}
 			if drawPlayer &&
 				math.Floor(xStart+float64(tx)) == math.Floor(g.player.position.X) &&
 				math.Floor(yStart+float64(ty)) == math.Floor(g.player.position.Y) {
-				screen.DrawImage(g.player.tile, &ebiten.DrawImageOptions{GeoM: geo})
+				sprite := g.player.sprite
+				sprite.Draw(screen, &ebiten.DrawImageOptions{GeoM: geo})
 			}
 		}
 	}

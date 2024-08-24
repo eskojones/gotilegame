@@ -8,24 +8,23 @@ import (
 	"os"
 )
 
-func makeLocationType(g *Game, name string, tileXY []image.Point, isBlocking bool) *LocationType {
+func makeLocationType(g *Game, name string, sprites []*Sprite, isBlocking bool) *LocationType {
 	locType := new(LocationType)
 	locType.name = name
 	locType.blocking = isBlocking
-	tiles := make([]*ebiten.Image, len(tileXY))
-	for i, p := range tileXY {
-		tiles[i] = g.tileset.SubImage(image.Rect(p.X*g.tileSize, p.Y*g.tileSize, p.X*g.tileSize+g.tileSize, p.Y*g.tileSize+g.tileSize)).(*ebiten.Image)
-	}
-	locType.tiles = tiles
+	locType.sprites = sprites
 	g.locationTypes[name] = locType
 	return locType
 }
 
 func makeWorld(g *Game) {
 	// some test tiles
-	makeLocationType(g, "grass", []image.Point{{8, 2}}, false)
-	makeLocationType(g, "stone", []image.Point{{1, 2}}, false)
-	makeLocationType(g, "stone2", []image.Point{{2, 2}}, false)
+	grass := makeSprite(g.tileset, []image.Point{{8, 2}, {6, 2}}, 32, 333)
+	stone := makeSprite(g.tileset, []image.Point{{1, 2}, {2, 2}}, 32, 1000)
+	stone2 := makeSprite(g.tileset, []image.Point{{3, 2}}, 32, 0)
+	makeLocationType(g, "grass", []*Sprite{grass}, false)
+	makeLocationType(g, "stone", []*Sprite{stone}, false)
+	makeLocationType(g, "stone2", []*Sprite{stone2}, false)
 	// test map fully populated
 	types := []string{"grass", "stone", "stone2"}
 	for y := 0; y < g.worldSize; y++ {
@@ -41,7 +40,7 @@ func makeWorld(g *Game) {
 	g.player.position.X = 0 // rand.Float64() * float64(g.worldSize)
 	g.player.position.Y = 0 // rand.Float64() * float64(g.worldSize)
 	g.player.moveSpeed = 0.0005
-	g.player.tile = g.tileset.SubImage(image.Rect(1*g.tileSize, 0*g.tileSize, 1*g.tileSize+g.tileSize, 0*g.tileSize+g.tileSize)).(*ebiten.Image)
+	g.player.sprite = makeSprite(g.tileset, []image.Point{{0, 0}, {0, 1}, {1, 1}, {1, 0}}, 32, 200)
 }
 
 func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale float64, worldSize int, tilesetFilename string, tileSize int) (*Game, error) {

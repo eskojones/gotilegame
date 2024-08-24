@@ -7,9 +7,9 @@ import (
 
 // LocationType : an archetype for a tile location
 type LocationType struct {
-	tiles    []*ebiten.Image // all tiles to be drawn at this location (from 0th upwards)
-	name     string          // name to describe this location
-	blocking bool            // does this location block entities from entering it?
+	sprites  []*Sprite
+	name     string // name to describe this location
+	blocking bool   // does this location block entities from entering it?
 }
 
 // Location : an instance of a tile location
@@ -23,11 +23,19 @@ type Point struct {
 	Y float64
 }
 
+type Sprite struct {
+	tiles     []*ebiten.Image
+	delay     int64
+	lastFrame int64
+	playing   bool
+	frame     int
+}
+
 // Player : the local player
 type Player struct {
-	position  Point         // position in the world
-	moveSpeed float64       // speed that X/Y are allowed to change by per tick
-	tile      *ebiten.Image // todo: implement sprite system
+	position  Point   // position in the world
+	moveSpeed float64 // speed that X/Y are allowed to change by per tick
+	sprite    *Sprite
 }
 
 // NetConn : all network-related vars
@@ -45,6 +53,7 @@ type Game struct {
 	worldSize     int                       // width / height of the game world (in tiles)
 	tileSize      int                       // width / height of the tiles (in pixels)
 	tileset       *ebiten.Image             // image file to use as tile atlas
+	sprites       map[string]*Sprite        // name -> sprites
 	locationTypes map[string]*LocationType  // name -> location types
 	world         map[int]map[int]*Location // y,x -> locations
 	player        Player                    // the local player
