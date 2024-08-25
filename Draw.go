@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-func drawWorld(screen *ebiten.Image, g *Game, pos Point) {
+func (world *World) Draw(screen *ebiten.Image, g *Game, pos Point) {
 	options := &ebiten.DrawImageOptions{}
 	w := float64(g.windowWidth)
 	h := float64(g.windowHeight)
@@ -29,68 +29,58 @@ func drawWorld(screen *ebiten.Image, g *Game, pos Point) {
 	fvX := math.Floor((viewX - vX) * -tileWidth)
 	fvY := math.Floor((viewY - vY) * -tileHeight)
 
-	var x float64 = 0
-	var y float64 = 0
 	// draw the world locations
-	for y < vH {
-		if g.world.locations[int(vY+y)] != nil && g.world.locations[int(vY+y)][int(vX+x)] != nil {
-			loc := g.world.locations[int(vY+y)][int(vX+x)]
+	for y := 0.0; y < vH; y++ {
+		yMap := world.locations[int(vY+y)]
+		if yMap == nil {
+			continue
+		}
+		for x := 0.0; x < vW; x++ {
+			loc := yMap[int(vX+x)]
+			if loc == nil {
+				continue
+			}
 			scaleX, scaleY := g.Layout(int(fvX+(x*tileWidth)), int(fvY+(y*tileHeight)))
 			options.GeoM.Reset()
 			options.GeoM.Translate(float64(scaleX), float64(scaleY))
-			for _, sprite := range loc.locationType.sprites {
+			sprites := loc.locationType.sprites
+			for _, sprite := range sprites {
 				sprite.Draw(screen, options)
 			}
 		}
-		x++
-		if x == vW {
-			x = 0.0
-			y++
-		}
 	}
 
-	// draw the entities above the ground (not yet implemented)
-	// x = 0
-	// y = 0
-	// for y < vH {
-	// 	if g.world.locations[int(vY+y)] != nil && g.world.locations[int(vY+y)][int(vX+x)] != nil {
-	// 		loc := g.world.locations[int(vY+y)][int(vX+x)]
-	// 		for _, entities := range loc.entities {
-	// 			// draw all the entities
-	// 		}
-	// 	}
-	// 	x++
-	// 	if x == vW {
-	// 		x = 0.0
-	// 		y++
-	// 	}
-	// }
+	// draw the players above all else
+	for y := 0.0; y < vH; y++ {
+		yInt := int(vY + y)
 
-	// draw the players above all else (just draws local player for testing atm)
-	x = 0
-	y = 0
-	for y < vH {
-		if int(vX+x) == int(pos.X) && int(vY+y) == int(pos.Y) {
-			fpX := (pos.X - math.Floor(pos.X)) * tileWidth
-			fpY := (pos.Y - math.Floor(pos.Y)) * tileHeight
-			scaleX, scaleY := g.Layout(int(fvX+fpX+(x*tileWidth)), int(fvY+fpY+(y*tileHeight)))
-			options.GeoM.Reset()
-			options.GeoM.Translate(float64(scaleX), float64(scaleY))
-			g.player.sprite.Draw(screen, options)
-		}
-		x++
-		if x == vW {
-			x = 0.0
-			y++
+		for x := 0.0; x < vW; x++ {
+			xInt := int(vX + x)
+
+			g.entityMutex.Lock()
+			ents := g.GetEntitiesAt(xInt, yInt)
+			g.entityMutex.Unlock()
+
+			for _, ent := range ents {
+				fpX := (ent.position.X - math.Floor(ent.position.X)) * tileWidth
+				fpY := (ent.position.Y - math.Floor(ent.position.Y)) * tileHeight
+				scaleX, scaleY := g.Layout(int(fvX+fpX+(x*tileWidth)), int(fvY+fpY+(y*tileHeight)))
+				options.GeoM.Reset()
+				options.GeoM.Translate(float64(scaleX), float64(scaleY))
+				ent.sprite.Draw(screen, options)
+			}
 		}
 	}
-
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Clear()
+	if g.player == nil {
+		return
+	}
+
 	x, y := ebiten.CursorPosition()
-	drawWorld(screen, g, g.player.position)
+	g.world.Draw(screen, g, g.player.position)
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf(
 		"%.0fFPS %.0fTPS\nRes: %dx%d\nCur: %d,%d\nPlayer: %.0f,%.0f\n",

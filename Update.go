@@ -12,33 +12,43 @@ func (g *Game) DeltaTimeUpdate() float64 {
 
 func (g *Game) Update() error {
 	dt := g.DeltaTimeUpdate()
+	g.lastUpdate = time.Now().UnixMilli()
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)
-	} else if ebiten.IsKeyPressed(ebiten.KeyW) {
-		g.player.position.Y -= g.player.moveSpeed * dt
-		if g.player.position.Y < 0 {
-			g.player.position.Y = 0
+	}
+
+	if g.player == nil {
+		return nil
+	}
+
+	move := Point{X: g.player.position.X, Y: g.player.position.Y}
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		move.Y -= g.player.moveSpeed * dt
+		if move.Y < 0 {
+			move.Y = 0
 		}
 	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
-		g.player.position.Y += g.player.moveSpeed * dt
-		if g.player.position.Y > float64(g.world.size) {
-			g.player.position.Y = float64(g.world.size - 1)
+		move.Y += g.player.moveSpeed * dt
+		if move.Y > float64(g.world.size) {
+			move.Y = float64(g.world.size - 1)
 		}
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		g.player.position.X -= g.player.moveSpeed * dt
-		if g.player.position.X < 0 {
-			g.player.position.X = 0
+		move.X -= g.player.moveSpeed * dt
+		if move.X < 0 {
+			move.X = 0
 		}
 	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
-		g.player.position.X += g.player.moveSpeed * dt
-		if g.player.position.X > float64(g.world.size) {
-			g.player.position.X = float64(g.world.size - 1)
+		move.X += g.player.moveSpeed * dt
+		if move.X > float64(g.world.size) {
+			move.X = float64(g.world.size - 1)
 		}
 	}
 
-	g.lastUpdate = time.Now().UnixMilli()
+	g.SetEntityPosition(g.player, move.X, move.Y)
+
 	return nil
 }

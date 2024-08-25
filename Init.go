@@ -36,19 +36,25 @@ func makeWorld(g *Game) {
 			if r > 95 {
 				g.world.locations[y][x] = new(Location)
 				g.world.locations[y][x].locationType = g.world.locationTypes["stone over dirt"]
-			} else if r > 30 {
+			} else if r > 20 {
 				g.world.locations[y][x] = new(Location)
 				g.world.locations[y][x].locationType = g.world.locationTypes["stone"]
 			}
 		}
 	}
 	// player config
-	g.player.position.X = 0 // rand.Float64() * float64(g.worldSize)
-	g.player.position.Y = 0 // rand.Float64() * float64(g.worldSize)
-	g.player.moveSpeed = 10.0
-	g.player.tileAtlas = g.world.tileAtlas
-	g.player.tileSize = g.world.tileSize
-	g.player.sprite = makeSprite(g.player.tileAtlas, []image.Point{{2, 13}, {2, 14}}, 32, 200)
+	// g.player = new(Entity)
+	// g.player.isPlayer = true
+	// g.player.name = "me"
+	// g.player.position.X = 0 // rand.Float64() * float64(g.worldSize)
+	// g.player.position.Y = 0 // rand.Float64() * float64(g.worldSize)
+	// g.player.moveSpeed = 10.0
+	// g.player.tileAtlas = g.world.tileAtlas
+	// g.player.tileSize = g.world.tileSize
+	// g.player.sprite = makeSprite(g.player.tileAtlas, []image.Point{{2, 14}, {2, 13}, {3, 13}}, 32, 200)
+
+	g.world.entities = make(map[int]map[int]map[string]*Entity)
+	g.world.entitiesFlat = make(map[string]*Entity)
 }
 
 func makeGame(windowTitle string, windowWidth int, windowHeight int, windowScale float64, worldSize int, tilesetFilename string, tileSize int) (*Game, error) {

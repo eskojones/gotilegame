@@ -11,7 +11,7 @@ func main() {
 		log.Fatal("Usage: go run . <address>:<port> <username> <password>")
 		return
 	}
-	g, err := makeGame("Game", 1024, 768, 1, 1024, "tileset-transparent.png", 32)
+	g, err := makeGame("Game", 800, 600, 1, 1024, "tileset-transparent.png", 32)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -20,7 +20,7 @@ func main() {
 	g.net.server = os.Args[1]
 	g.net.username = os.Args[2]
 	g.net.password = os.Args[3]
-	go NetUpdate(g)
+	go g.net.Update(g)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
