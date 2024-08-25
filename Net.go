@@ -15,7 +15,7 @@ import (
 )
 
 func (net *NetConn) SendUpdate(g *Game) {
-	if g.player == nil || time.Now().UnixMilli()-net.lastUpdate < 100 {
+	if g.player == nil || time.Now().UnixMilli()-net.lastUpdate < 50 {
 		return
 	}
 	net.lastUpdate = time.Now().UnixMilli()
@@ -51,7 +51,7 @@ func (net *NetConn) Update(g *Game) {
 			if g.running == false {
 				return
 			}
-			_ = net.connection.SetReadDeadline(time.Now().Add(50 * time.Millisecond))
+			_ = net.connection.SetReadDeadline(time.Now().Add(5 * time.Millisecond))
 			count, err := net.connection.Read(readBuf)
 			if err != nil {
 				if errors.Is(err, io.EOF) || errors.Is(err, os.ErrClosed) {
