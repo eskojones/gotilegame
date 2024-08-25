@@ -7,7 +7,6 @@ import (
 	"image"
 	"io"
 	"log"
-	"math/rand/v2"
 	"os"
 	"strconv"
 	"strings"
@@ -15,7 +14,7 @@ import (
 )
 
 func (net *NetConn) SendUpdate(g *Game) {
-	if g.player == nil || time.Now().UnixMilli()-net.lastUpdate < 50 {
+	if g.player == nil || time.Now().UnixMilli()-net.lastUpdate < 1000/PLAYER_UPDATE_PER_SECOND {
 		return
 	}
 	net.lastUpdate = time.Now().UnixMilli()
@@ -32,7 +31,7 @@ func (net *NetConn) Update(g *Game) {
 		}
 		if net.connection == nil {
 			// (re)connect
-			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), NET_TIMEOUT*time.Second)
 			conn, err := net.dialer.DialContext(ctx, "tcp", g.net.server)
 			if err != nil {
 				log.Fatalf("Failed to connect: %v", err)
@@ -44,14 +43,14 @@ func (net *NetConn) Update(g *Game) {
 			_, _ = conn.Write([]byte(fmt.Sprintf("%s %s %s\n", CLIENT_FN_LOGIN, net.username, net.password)))
 		}
 
-		readBuf := make([]byte, 1024)
-		messageBuf := make([]byte, 1024)
+		readBuf := make([]byte, NET_MSG_MAX_LEN)
+		messageBuf := make([]byte, NET_MSG_MAX_LEN)
 		var bytesReadCount int
 		for {
 			if g.running == false {
 				return
 			}
-			_ = net.connection.SetReadDeadline(time.Now().Add(5 * time.Millisecond))
+			_ = net.connection.SetReadDeadline(time.Now().Add(NET_READ_DEADLINE * time.Millisecond))
 			count, err := net.connection.Read(readBuf)
 			if err != nil {
 				if errors.Is(err, io.EOF) || errors.Is(err, os.ErrClosed) {
@@ -72,7 +71,7 @@ func (net *NetConn) Update(g *Game) {
 			messageBuf = fmt.Appendf(messageBuf[:bytesReadCount], "%s", readBuf[:count])
 			bytesReadCount += count
 
-			if bytesReadCount > 1024 {
+			if bytesReadCount > NET_MSG_MAX_LEN {
 				fmt.Printf("[%s sent an invalid message (too long)]\n", net.server)
 				break
 			}
@@ -114,6 +113,23 @@ func (g *Game) HandleMessages() {
 			y, _ := strconv.ParseFloat(yStr, 64)
 			// fmt.Printf("message: %s %s %.4f %.4f\n", CLIENT_FN_UPDATE, id, x, y)
 			g.UpdateEntityPosition(id, x, y)
+		case CLIENT_FN_QUERY:
+			// server is responding to our query about an entity
+			id := words[1]
+			if g.world.entitiesFlat[id] != nil {
+				spriteStr := words[2:]
+				var frames []image.Point
+				for _, xyStr := range spriteStr {
+					if len(xyStr) == 0 {
+						continue
+					}
+					parts := strings.Split(xyStr, ",")
+					x, _ := strconv.ParseInt(parts[0], 10, 64)
+					y, _ := strconv.ParseInt(parts[1], 10, 64)
+					frames = append(frames, image.Point{X: int(x), Y: int(y)})
+				}
+				g.world.entitiesFlat[id].sprite = makeSprite(g.world.tileAtlas, frames, g.world.tileSize, 500)
+			}
 		}
 
 		g.entityMutex.Unlock()
@@ -131,7 +147,6 @@ func makeEntity(g *Game, id string) (*Entity, error) {
 	ent.name = id
 	ent.tileSize = g.world.tileSize
 	ent.tileAtlas = g.world.tileAtlas
-	ent.sprite = makeSprite(ent.tileAtlas, []image.Point{{rand.Int() % 6, 2}}, ent.tileSize, 0)
 	ent.moveSpeed = 10.0
 	g.world.entitiesFlat[id] = ent
 	return ent, nil
@@ -192,6 +207,9 @@ func (g *Game) UpdateEntityPosition(id string, x float64, y float64) {
 		if id == g.net.username {
 			g.player = entFlat
 		}
+
+		// ask server about this entity (sprite, etc)
+		g.SendEntityQuery(id)
 	}
 	g.SetEntityPosition(entFlat, x, y)
 }
@@ -211,4 +229,14 @@ func (g *Game) GetEntitiesAt(x int, y int) []*Entity {
 	}
 	return result
 
+}
+
+func (g *Game) SendEntityQuery(id string) {
+	if g.net.connection == nil || len(id) == 0 {
+		return
+	}
+	_, err := g.net.connection.Write([]byte(fmt.Sprintf("%s %s\n", CLIENT_FN_QUERY, id)))
+	if err != nil {
+		return
+	}
 }

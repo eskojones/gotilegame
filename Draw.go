@@ -62,6 +62,9 @@ func (world *World) Draw(screen *ebiten.Image, g *Game, pos Point) {
 			g.entityMutex.Unlock()
 
 			for _, ent := range ents {
+				if ent.sprite == nil {
+					continue
+				}
 				fpX := (ent.position.X - math.Floor(ent.position.X)) * tileWidth
 				fpY := (ent.position.Y - math.Floor(ent.position.Y)) * tileHeight
 				scaleX, scaleY := g.Layout(int(fvX+fpX+(x*tileWidth)), int(fvY+fpY+(y*tileHeight)))
